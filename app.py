@@ -269,7 +269,19 @@ def create_request_payload(target_uid: int) -> bytes:
 
 def extract_player_info(profile_data: Dict) -> Dict:
     try:
-        player_name = profile_data.get(3, 'Bilinmeyen Oyuncu') if isinstance(profile_data, dict) else 'Bilinmeyen Oyuncu'
+    
+        player_name = 'Bilinmeyen Oyuncu'
+
+        if not isinstance(profile_data, dict):
+            return {'player_name': player_name}
+
+        value_3 = profile_data.get(3)
+        value_27 = profile_data.get(27)
+
+        if value_3 is not None and value_27 is not None and value_3 == value_27:
+            player_name = 'Bilinmeyen Oyuncu'
+        else:
+            player_name = value_27 if value_27 is not None else 'Bilinmeyen Oyuncu'
 
         return {
             'player_name': player_name,
