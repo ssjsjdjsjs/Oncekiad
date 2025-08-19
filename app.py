@@ -269,14 +269,30 @@ def create_request_payload(target_uid: int) -> bytes:
 
 def extract_player_info(profile_data: Dict) -> Dict:
     try:
-        player_name = profile_data.get(27, 'Bilinmeyen Oyuncu') if isinstance(profile_data, dict) else 'Bilinmeyen Oyuncu'
- 
+        # Varsayılan oyuncu adı
+        player_name = 'Bilinmeyen Oyuncu'
+        
+        # Profil verisi bir dict değilse varsayılan değeri döndür
+        if not isinstance(profile_data, dict):
+            return {'player_name': player_name}
+
+        # 3, 13 ve 27 değerlerini al
+        value_3 = profile_data.get(3)
+        value_13 = profile_data.get(13)
+        value_27 = profile_data.get(27)
+
+        # İsim belirleme mantığı
+        if value_3 is not None and value_27 is not None and value_3 == value_27:
+            player_name = value_13 if value_13 is not None else value_27
+        else:
+            player_name = value_27 if value_27 is not None else (value_13 if value_13 is not None else 'Bilinmeyen Oyuncu')
+
         return {
             'player_name': player_name,
         }
     except Exception as e:
         logging.error(f"Oyuncu bilgisi çıkarılırken hata: {e}")
-        return {'uid': None, 'player_name': None, 'region': 'Bilinmeyen Bölge'}
+        return {'player_name': 'Bilinmeyen Oyuncu'}
 
 @app.route('/oncekiad', methods=['GET'])
 def get_player_info():
